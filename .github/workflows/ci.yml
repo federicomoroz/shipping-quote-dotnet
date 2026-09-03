@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restaurar
+        run: dotnet restore
+
+      - name: Compilar
+        # Las advertencias fallan el build en CI y no en local: la maquina de
+        # uno acumula ruido, la rama principal no deberia.
+        run: dotnet build --no-restore -c Release -warnaserror
+
+      # Los de integracion levantan un MySQL 8.0 real via Testcontainers.
+      # El runner de ubuntu ya trae Docker, asi que no hay que instalar nada.
+      - name: Tests
+        run: dotnet test --no-build -c Release --logger "trx;LogFileName=resultados.trx"
+
+      - name: Resumen
+        if: always()
+        run: |
+          {
+            echo '## Tests'
+            echo '```'
+            find . -name "resultados.trx" -exec grep -o 'total="[0-9]*" executed="[0-9]*" passed="[0-9]*" failed="[0-9]*"' {} + || echo 'sin resultados'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,35 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: shipping_quote
+      MYSQL_ROOT_PASSWORD: shipping
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # La API espera a que MySQL acepte conexiones, no a que el contenedor
+      # arranque: el proceso levanta bastante antes de estar listo, y sin esto
+      # la primera migracion sale con "connection refused".
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pshipping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: src/ShippingQuote.Api/Dockerfile
+    environment:
+      ConnectionStrings__Quotes: "Server=mysql;Port=3306;Database=shipping_quote;User=root;Password=shipping;"
+      ASPNETCORE_ENVIRONMENT: Development
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql-data:

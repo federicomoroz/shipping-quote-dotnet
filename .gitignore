@@ -1,0 +1,29 @@
+## Build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.user
+*.suo
+
+## Resultados de test
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.xml
+coverage*.json
+
+## Herramientas y editores
+.vs/
+.vscode/
+.idea/
+*.swp
+
+## Sistema
+.DS_Store
+Thumbs.db
+
+## Secretos y config local
+appsettings.*.local.json
+*.pfx
+.env
