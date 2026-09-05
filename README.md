@@ -130,9 +130,8 @@ dotnet run --project src/ShippingQuote.Api
 
 ## Base de datos
 
-MySQL, no SQLite. SQLite serializa las escrituras, así que un servicio que
-existe para mostrar trabajo concurrente se trabaría justo en el único punto
-donde escribe: con veinte requests en paralelo devolvía `database is locked`.
+MySQL, no SQLite. SQLite serializa las escrituras, así que un servicio que hace
+trabajo concurrente se trabaría justo en el único punto donde escribe: con veinte requests en paralelo devolvía `database is locked`.
 
 Lo que eso permite hacer bien:
 
